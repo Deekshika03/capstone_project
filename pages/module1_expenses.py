@@ -1,6 +1,14 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+<<<<<<< HEAD
+=======
+from PIL import Image
+
+from src.ingestion.csv_parser import parse_csv
+from src.ingestion.ocr_parser import parse_image, parse_image_raw_text
+from src.ingestion.transaction import Transaction
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 
 CATEGORIES = {
     "Food":          ["grocery", "restaurant", "food", "zomato", "uber eats", "starbucks", "coffee", "dining"],
@@ -17,6 +25,7 @@ def categorize(description: str) -> str:
             return category
     return "Other"
 
+<<<<<<< HEAD
 def load_and_validate(file) -> pd.DataFrame:
     df = pd.read_csv(file)
     required = {"Date", "Description", "Amount", "Type"}
@@ -51,12 +60,77 @@ if not uploaded:
     st.stop()
 
 df = load_and_validate(uploaded)
+=======
+def transactions_to_df(transactions: list[Transaction]) -> pd.DataFrame:
+    rows = []
+    for t in transactions:
+        rows.append({
+            "Date":        t.date,
+            "Description": t.description,
+            "Amount":      t.amount,
+            "Type":        t.type,
+            "Category":    categorize(t.description),
+            "Month":       pd.to_datetime(str(t.date)).strftime("%b %Y"),
+            "Source":      t.source or "csv",
+        })
+    return pd.DataFrame(rows)
+
+st.title("💰 Smart Expense Manager")
+st.caption("Upload bank transactions via CSV or scan a receipt/bill image.")
+
+tab_csv, tab_ocr = st.tabs(["📄 Upload CSV", "🖼️ Scan Receipt / Bill"])
+df = pd.DataFrame()
+
+with tab_csv:
+    uploaded = st.file_uploader("Upload CSV (Date, Description, Amount, Type)", type="csv")
+    if not uploaded:
+        st.info("👆 Upload a CSV to get started.")
+        with open("sample_transactions.csv", "rb") as f:
+            st.download_button("⬇️ Download Sample CSV", f, "sample_transactions.csv", "text/csv")
+    else:
+        try:
+            transactions = parse_csv(uploaded)
+            df = transactions_to_df(transactions)
+            st.success(f"✅ Loaded {len(df)} transactions from CSV.")
+        except ValueError as e:
+            st.error(f"❌ {e}")
+
+with tab_ocr:
+    st.caption("Upload a photo of a receipt or bill. Supported: JPG, PNG, WEBP.")
+    img_file = st.file_uploader("Upload receipt image", type=["jpg", "jpeg", "png", "webp"], key="ocr_upload")
+    if img_file:
+        image = Image.open(img_file)
+        col_img, col_result = st.columns(2)
+        with col_img:
+            st.image(image, caption="Uploaded Image", use_container_width=True)
+        with col_result:
+            with st.spinner("Running OCR..."):
+                try:
+                    transactions = parse_image(image)
+                    ocr_df = transactions_to_df(transactions)
+                    st.success("✅ Extracted transaction:")
+                    st.dataframe(ocr_df[["Date", "Description", "Amount", "Type"]], hide_index=True)
+                    df = pd.concat([df, ocr_df], ignore_index=True) if not df.empty else ocr_df
+                except ValueError as e:
+                    st.error(f"❌ {e}")
+        with st.expander("🔍 View raw OCR text"):
+            st.text(parse_image_raw_text(image))
+
+if df.empty:
+    st.stop()
+
+df["Date"] = pd.to_datetime(df["Date"])
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 income_df  = df[df["Type"].str.lower() == "income"]
 expense_df = df[df["Type"].str.lower() == "expense"]
 total_income  = income_df["Amount"].sum()
 total_expense = abs(expense_df["Amount"].sum())
 balance       = total_income - total_expense
 
+<<<<<<< HEAD
+=======
+st.markdown("---")
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 c1, c2, c3 = st.columns(3)
 for col, label, value, css in [
     (c1, "Total Income",   f"${total_income:,.2f}",  "income"),
@@ -72,7 +146,10 @@ for col, label, value, css in [
 st.markdown("<br>", unsafe_allow_html=True)
 
 col_pie, col_bar = st.columns(2)
+<<<<<<< HEAD
 
+=======
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 with col_pie:
     st.subheader("🍕 Expenses by Category")
     cat_data = expense_df.groupby("Category")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
@@ -107,6 +184,10 @@ if search:
     display_df = display_df[mask]
 
 display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
+<<<<<<< HEAD
 st.dataframe(display_df[["Date", "Description", "Amount", "Type", "Category"]],
+=======
+st.dataframe(display_df[["Date", "Description", "Amount", "Type", "Category", "Source"]],
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
              use_container_width=True, hide_index=True)
 st.caption(f"Showing {len(display_df)} of {len(df)} transactions")

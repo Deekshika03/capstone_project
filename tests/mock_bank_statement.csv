@@ -1,0 +1,11 @@
+Date,Description,Amount,Type,Balance
+2024-01-05,Salary Credit,5000.00,credit,5000.00
+2024-01-07,Uber Ride,12.50,debit,4987.50
+2024-01-08,Amazon Shopping,85.00,debit,4902.50
+2024-01-10,Netflix Subscription,15.99,debit,4886.51
+2024-01-12,Grocery Store,62.30,debit,4824.21
+2024-01-15,Freelance Payment,1200.00,credit,6024.21
+2024-01-18,Electric Bill,110.00,debit,5914.21
+2024-01-20,Starbucks Coffee,6.75,debit,5907.46
+2024-01-22,Bus Pass,45.00,debit,5862.46
+2024-01-25,Restaurant Dinner,38.50,debit,5823.96

@@ -1,3 +1,13 @@
-venv/ 
-__pycache__/ 
-*.pyc 
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.pdf
+*.jpg
+*.jpeg
+*.png
+.pytest_cache/
+*.egg-info/
+dist/
+build/

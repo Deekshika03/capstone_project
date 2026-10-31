@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from modules import budget_insights
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="FinGuard AI – Expense Manager", page_icon="💰", layout="wide")
@@ -108,60 +109,60 @@ for col, label, value, css in [
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Charts ────────────────────────────────────────────────────────────────────
-col_pie, col_bar = st.columns(2)
+# ── Tabs ──────────────────────────────────────────────────────────────────────
+tab1, tab2 = st.tabs(["📊 Dashboard", "🎯 Budget Insights"])
 
-with col_pie:
-    st.subheader("🍕 Expenses by Category")
-    cat_data = expense_df.groupby("Category")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
-    cat_data.columns = ["Category", "Amount"]
-    fig_pie = px.pie(
-        cat_data, values="Amount", names="Category",
-        color_discrete_sequence=px.colors.qualitative.Pastel,
-        hole=0.4,
+with tab1:
+    # ── Charts ────────────────────────────────────────────────────────────────
+    col_pie, col_bar = st.columns(2)
+
+    with col_pie:
+        st.subheader("🍕 Expenses by Category")
+        cat_data = expense_df.groupby("Category")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
+        cat_data.columns = ["Category", "Amount"]
+        fig_pie = px.pie(
+            cat_data, values="Amount", names="Category",
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+            hole=0.4,
+        )
+        fig_pie.update_traces(textposition="inside", textinfo="percent+label")
+        fig_pie.update_layout(showlegend=False, margin=dict(t=10, b=10))
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+    with col_bar:
+        st.subheader("📊 Monthly Income vs Expenses")
+        monthly_income  = income_df.groupby("Month")["Amount"].sum().reset_index()
+        monthly_expense = expense_df.groupby("Month")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
+        monthly_income["Type"]  = "Income"
+        monthly_expense["Type"] = "Expense"
+        monthly = pd.concat([monthly_income, monthly_expense])
+        month_order = df.sort_values("Date")["Month"].unique().tolist()
+        monthly["Month"] = pd.Categorical(monthly["Month"], categories=month_order, ordered=True)
+        monthly.sort_values("Month", inplace=True)
+        fig_bar = px.bar(
+            monthly, x="Month", y="Amount", color="Type", barmode="group",
+            color_discrete_map={"Income": "#4ade80", "Expense": "#f87171"},
+        )
+        fig_bar.update_layout(legend_title_text="", margin=dict(t=10, b=10))
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    # ── Transactions table ─────────────────────────────────────────────────────
+    st.subheader("🔍 All Transactions")
+    search = st.text_input("Search by description or category", placeholder="e.g. Amazon, Food…")
+    display_df = df.copy()
+    if search:
+        mask = (
+            display_df["Description"].str.contains(search, case=False, na=False) |
+            display_df["Category"].str.contains(search, case=False, na=False)
+        )
+        display_df = display_df[mask]
+    display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
+    st.dataframe(
+        display_df[["Date", "Description", "Amount", "Type", "Category"]],
+        use_container_width=True,
+        hide_index=True,
     )
-    fig_pie.update_traces(textposition="inside", textinfo="percent+label")
-    fig_pie.update_layout(showlegend=False, margin=dict(t=10, b=10))
-    st.plotly_chart(fig_pie, use_container_width=True)
+    st.caption(f"Showing {len(display_df)} of {len(df)} transactions")
 
-with col_bar:
-    st.subheader("📊 Monthly Income vs Expenses")
-
-    # Sort months chronologically
-    monthly_income  = income_df.groupby("Month")["Amount"].sum().reset_index()
-    monthly_expense = expense_df.groupby("Month")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
-    monthly_income["Type"]  = "Income"
-    monthly_expense["Type"] = "Expense"
-    monthly = pd.concat([monthly_income, monthly_expense])
-
-    # Preserve month order
-    month_order = df.sort_values("Date")["Month"].unique().tolist()
-    monthly["Month"] = pd.Categorical(monthly["Month"], categories=month_order, ordered=True)
-    monthly.sort_values("Month", inplace=True)
-
-    fig_bar = px.bar(
-        monthly, x="Month", y="Amount", color="Type", barmode="group",
-        color_discrete_map={"Income": "#4ade80", "Expense": "#f87171"},
-    )
-    fig_bar.update_layout(legend_title_text="", margin=dict(t=10, b=10))
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-# ── Transactions table ────────────────────────────────────────────────────────
-st.subheader("🔍 All Transactions")
-
-search = st.text_input("Search by description or category", placeholder="e.g. Amazon, Food…")
-display_df = df.copy()
-if search:
-    mask = (
-        display_df["Description"].str.contains(search, case=False, na=False) |
-        display_df["Category"].str.contains(search, case=False, na=False)
-    )
-    display_df = display_df[mask]
-
-display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
-st.dataframe(
-    display_df[["Date", "Description", "Amount", "Type", "Category"]],
-    use_container_width=True,
-    hide_index=True,
-)
-st.caption(f"Showing {len(display_df)} of {len(df)} transactions")
+with tab2:
+    budget_insights.render(expense_df)

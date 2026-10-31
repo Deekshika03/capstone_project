@@ -23,6 +23,10 @@ for i, cat in enumerate(CATEGORIES):
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+<<<<<<< HEAD
+# Build comparison dataframe
+=======
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 data = pd.DataFrame({
     "Category": CATEGORIES,
     "Budget":   [budgets[c] for c in CATEGORIES],
@@ -31,6 +35,10 @@ data = pd.DataFrame({
 data["Remaining"] = data["Budget"] - data["Spent"]
 data["Status"]    = data["Remaining"].apply(lambda x: "Over Budget 🔴" if x < 0 else "On Track 🟢")
 
+<<<<<<< HEAD
+# ── Alerts ────────────────────────────────────────────────────────────────────
+=======
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 over = data[data["Remaining"] < 0]
 if not over.empty:
     for _, row in over.iterrows():
@@ -40,16 +48,28 @@ else:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+<<<<<<< HEAD
+# ── Chart ─────────────────────────────────────────────────────────────────────
+=======
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 melted = data.melt(id_vars="Category", value_vars=["Budget", "Spent"], var_name="Type", value_name="Amount")
 fig = px.bar(melted, x="Category", y="Amount", color="Type", barmode="group",
              color_discrete_map={"Budget": "#60a5fa", "Spent": "#f87171"})
 fig.update_layout(legend_title_text="", margin=dict(t=10, b=10))
 st.plotly_chart(fig, use_container_width=True)
 
+<<<<<<< HEAD
+# ── Table ─────────────────────────────────────────────────────────────────────
+=======
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 st.subheader("📊 Budget Summary")
 st.dataframe(data[["Category", "Budget", "Spent", "Remaining", "Status"]],
              use_container_width=True, hide_index=True)
 
+<<<<<<< HEAD
+# ── Suggestions ───────────────────────────────────────────────────────────────
+=======
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 st.subheader("💡 Suggestions")
 total_budget = data["Budget"].sum()
 total_spent  = data["Spent"].sum()

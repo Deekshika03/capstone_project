@@ -1,11 +1,14 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+<<<<<<< HEAD
+=======
 from PIL import Image
 
 from src.ingestion.csv_parser import parse_csv
 from src.ingestion.ocr_parser import parse_image, parse_image_raw_text
 from src.ingestion.transaction import Transaction
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 
 CATEGORIES = {
     "Food":          ["grocery", "restaurant", "food", "zomato", "uber eats", "starbucks", "coffee", "dining"],
@@ -22,6 +25,42 @@ def categorize(description: str) -> str:
             return category
     return "Other"
 
+<<<<<<< HEAD
+def load_and_validate(file) -> pd.DataFrame:
+    df = pd.read_csv(file)
+    required = {"Date", "Description", "Amount", "Type"}
+    missing = required - set(df.columns)
+    if missing:
+        st.error(f"❌ Missing columns: {', '.join(missing)}. Please check your CSV.")
+        st.stop()
+
+    df.dropna(subset=["Date", "Amount", "Type"], inplace=True)
+    df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce")
+    invalid = df["Amount"].isna().sum()
+    if invalid:
+        st.warning(f"⚠️ {invalid} row(s) had non-numeric amounts and were removed.")
+    df.dropna(subset=["Amount"], inplace=True)
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df.dropna(subset=["Date"], inplace=True)
+    df["Description"] = df["Description"].fillna("Unknown")
+    df["Category"] = df["Description"].apply(categorize)
+    df["Month"] = df["Date"].dt.strftime("%b %Y")
+    return df
+
+# ── Page ──────────────────────────────────────────────────────────────────────
+st.title("💰 Smart Expense Manager")
+st.caption("Upload your bank transactions CSV to get instant insights.")
+
+uploaded = st.file_uploader("📂 Upload CSV (Date, Description, Amount, Type)", type="csv")
+
+if not uploaded:
+    st.info("👆 Upload a CSV file to get started. Download the sample below to try it out.")
+    with open("sample_transactions.csv", "rb") as f:
+        st.download_button("⬇️ Download Sample CSV", f, "sample_transactions.csv", "text/csv")
+    st.stop()
+
+df = load_and_validate(uploaded)
+=======
 def transactions_to_df(transactions: list[Transaction]) -> pd.DataFrame:
     rows = []
     for t in transactions:
@@ -81,13 +120,17 @@ if df.empty:
     st.stop()
 
 df["Date"] = pd.to_datetime(df["Date"])
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 income_df  = df[df["Type"].str.lower() == "income"]
 expense_df = df[df["Type"].str.lower() == "expense"]
 total_income  = income_df["Amount"].sum()
 total_expense = abs(expense_df["Amount"].sum())
 balance       = total_income - total_expense
 
+<<<<<<< HEAD
+=======
 st.markdown("---")
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 c1, c2, c3 = st.columns(3)
 for col, label, value, css in [
     (c1, "Total Income",   f"${total_income:,.2f}",  "income"),
@@ -103,6 +146,10 @@ for col, label, value, css in [
 st.markdown("<br>", unsafe_allow_html=True)
 
 col_pie, col_bar = st.columns(2)
+<<<<<<< HEAD
+
+=======
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
 with col_pie:
     st.subheader("🍕 Expenses by Category")
     cat_data = expense_df.groupby("Category")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
@@ -137,6 +184,10 @@ if search:
     display_df = display_df[mask]
 
 display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
+<<<<<<< HEAD
+st.dataframe(display_df[["Date", "Description", "Amount", "Type", "Category"]],
+=======
 st.dataframe(display_df[["Date", "Description", "Amount", "Type", "Category", "Source"]],
+>>>>>>> c9415fcb641fe73e98915560ccf32c9bbdff371b
              use_container_width=True, hide_index=True)
 st.caption(f"Showing {len(display_df)} of {len(df)} transactions")

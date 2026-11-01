@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from modules import budget_insights, bill_insights
+from modules import budget_insights, bill_insights, emergency_fund_insights
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="FinGuard AI – Expense Manager", page_icon="💰", layout="wide")
@@ -110,7 +110,7 @@ for col, label, value, css in [
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "🎯 Budget Insights", "💳 Recurring Bills & EMIs"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Dashboard", "🎯 Budget Insights", "💳 Recurring Bills & EMIs", "🛡️ Emergency Fund"])
 
 with tab1:
     # ── Charts ────────────────────────────────────────────────────────────────
@@ -169,3 +169,6 @@ with tab2:
 
 with tab3:
     bill_insights.render(df)
+
+with tab4:
+    emergency_fund_insights.render(df)

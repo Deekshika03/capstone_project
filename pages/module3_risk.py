@@ -80,7 +80,7 @@ gauge = go.Figure(go.Indicator(
 ))
 gauge.update_layout(height=280, margin=dict(t=30, b=10, l=20, r=20),
                     paper_bgcolor="rgba(0,0,0,0)", font_color="white")
-st.plotly_chart(gauge, use_container_width=True)
+st.plotly_chart(gauge, width="stretch")
 
 st.subheader("🔍 Score Breakdown")
 b1, b2, b3 = st.columns(3)
@@ -152,7 +152,7 @@ if planned_monthly_savings > 0:
                        annotation_text="6-Month Target", annotation_position="bottom right")
     fig_proj.update_layout(margin=dict(t=10, b=10), paper_bgcolor="rgba(0,0,0,0)",
                            font_color="white", plot_bgcolor="rgba(0,0,0,0)")
-    st.plotly_chart(fig_proj, use_container_width=True)
+    st.plotly_chart(fig_proj, width="stretch")
 else:
     st.info("Enter a planned monthly savings amount to see the projection chart.")
 

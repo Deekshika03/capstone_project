@@ -140,7 +140,7 @@ def render(df: pd.DataFrame) -> None:
                           annotation_text="Senior Target", annotation_position="bottom right")
         fig.update_layout(margin=dict(t=10, b=10), paper_bgcolor="rgba(0,0,0,0)",
                           font_color="white", plot_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     else:
         st.info("Set a monthly contribution above to see the projection chart.")
 
@@ -161,7 +161,7 @@ def render(df: pd.DataFrame) -> None:
         fig_cat.update_layout(coloraxis_showscale=False, margin=dict(t=10, b=10),
                                paper_bgcolor="rgba(0,0,0,0)", font_color="white",
                                plot_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_cat, use_container_width=True)
+        st.plotly_chart(fig_cat, width="stretch")
 
     st.markdown("---")
 

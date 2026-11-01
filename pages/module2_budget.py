@@ -44,11 +44,11 @@ melted = data.melt(id_vars="Category", value_vars=["Budget", "Spent"], var_name=
 fig = px.bar(melted, x="Category", y="Amount", color="Type", barmode="group",
              color_discrete_map={"Budget": "#60a5fa", "Spent": "#f87171"})
 fig.update_layout(legend_title_text="", margin=dict(t=10, b=10))
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 st.subheader("📊 Budget Summary")
 st.dataframe(data[["Category", "Budget", "Spent", "Remaining", "Status"]],
-             use_container_width=True, hide_index=True)
+             width="stretch", hide_index=True)
 
 st.subheader("💡 Suggestions")
 total_budget = data["Budget"].sum()

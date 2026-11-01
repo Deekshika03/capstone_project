@@ -129,7 +129,7 @@ def render(expense_df: pd.DataFrame) -> None:
             labels={"Spent": "Amount ($)", "Category": ""},
         )
         fig.update_layout(coloraxis_showscale=False, margin=dict(t=10, b=10))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with col_gauge:
         fig_gauge = px.pie(
@@ -140,7 +140,7 @@ def render(expense_df: pd.DataFrame) -> None:
         )
         fig_gauge.update_traces(textposition="inside", textinfo="percent+label")
         fig_gauge.update_layout(showlegend=False, margin=dict(t=40, b=10))
-        st.plotly_chart(fig_gauge, use_container_width=True)
+        st.plotly_chart(fig_gauge, width="stretch")
 
     st.divider()
 
@@ -176,7 +176,7 @@ def render(expense_df: pd.DataFrame) -> None:
                 labels={"Amount": "Amount ($)"},
             )
             fig_comp.update_layout(legend_title_text="", margin=dict(t=10, b=10))
-            st.plotly_chart(fig_comp, use_container_width=True)
+            st.plotly_chart(fig_comp, width="stretch")
         else:
             st.info("ℹ️ No previous month available for comparison.")
     else:
@@ -197,7 +197,7 @@ def render(expense_df: pd.DataFrame) -> None:
         annotation_text=f"Budget ${budget:,.0f}", annotation_position="top left",
     )
     fig_trend.update_layout(margin=dict(t=10, b=10))
-    st.plotly_chart(fig_trend, use_container_width=True)
+    st.plotly_chart(fig_trend, width="stretch")
 
     st.divider()
 

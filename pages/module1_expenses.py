@@ -63,7 +63,7 @@ with tab_ocr:
         image = Image.open(img_file)
         col_img, col_result = st.columns(2)
         with col_img:
-            st.image(image, caption="Uploaded Image", use_container_width=True)
+            st.image(image, caption="Uploaded Image", width="stretch")
         with col_result:
             with st.spinner("Running OCR..."):
                 try:
@@ -111,7 +111,7 @@ with col_pie:
                      color_discrete_sequence=px.colors.qualitative.Pastel, hole=0.4)
     fig_pie.update_traces(textposition="inside", textinfo="percent+label")
     fig_pie.update_layout(showlegend=False, margin=dict(t=10, b=10))
-    st.plotly_chart(fig_pie, use_container_width=True)
+    st.plotly_chart(fig_pie, width="stretch")
 
 with col_bar:
     st.subheader("📊 Monthly Income vs Expenses")
@@ -126,7 +126,7 @@ with col_bar:
     fig_bar = px.bar(monthly, x="Month", y="Amount", color="Type", barmode="group",
                      color_discrete_map={"Income": "#4ade80", "Expense": "#f87171"})
     fig_bar.update_layout(legend_title_text="", margin=dict(t=10, b=10))
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig_bar, width="stretch")
 
 st.subheader("🔍 All Transactions")
 search = st.text_input("Search by description or category", placeholder="e.g. Amazon, Food…")
@@ -138,5 +138,5 @@ if search:
 
 display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
 st.dataframe(display_df[["Date", "Description", "Amount", "Type", "Category", "Source"]],
-             use_container_width=True, hide_index=True)
+             width="stretch", hide_index=True)
 st.caption(f"Showing {len(display_df)} of {len(df)} transactions")

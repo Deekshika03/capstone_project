@@ -373,7 +373,7 @@ with tab1:
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#a0a0c0"),
         )
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width="stretch")
 
     with col_bar:
         st.subheader("📊 Monthly Income vs Expenses")
@@ -394,7 +394,7 @@ with tab1:
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#a0a0c0"),
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width="stretch")
 
     # ── Transactions table ────────────────────────────────────────────────────
     st.subheader("🔍 All Transactions")
@@ -409,7 +409,7 @@ with tab1:
     disp["Date"] = disp["Date"].dt.strftime("%Y-%m-%d")
     st.dataframe(
         disp[["Date", "Description", "Amount", "Type", "Category"]],
-        use_container_width=True, hide_index=True,
+        width="stretch", hide_index=True,
     )
     st.caption(f"Showing {len(disp)} of {len(df)} transactions")
 

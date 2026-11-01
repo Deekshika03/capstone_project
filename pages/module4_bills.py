@@ -275,7 +275,7 @@ if upcoming_list:
             margin=dict(t=20, b=20, l=10, r=10),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width="stretch")
 
     with chart_col2:
         st.markdown("**Projected Cash Balance Trajectory**")
@@ -300,7 +300,7 @@ if upcoming_list:
             font_color="#ffffff",
             margin=dict(t=20, b=20, l=10, r=10),
         )
-        st.plotly_chart(fig_line, use_container_width=True)
+        st.plotly_chart(fig_line, width="stretch")
 else:
     st.info("No upcoming payments within the next 30-day projection window.")
 
@@ -330,10 +330,10 @@ else:
 
     tab_all, tab_emis_only = st.tabs(["All Detected Recurring Bills", f"EMIs Only ({len(emis)})"])
     with tab_all:
-        st.dataframe(df_bills, use_container_width=True, hide_index=True)
+        st.dataframe(df_bills, width="stretch", hide_index=True)
     with tab_emis_only:
         df_emis = df_bills[df_bills["Type"].str.contains("EMI")]
-        st.dataframe(df_emis, use_container_width=True, hide_index=True)
+        st.dataframe(df_emis, width="stretch", hide_index=True)
 
 # ── Upcoming 30-Day Payment Schedule ──────────────────────────────────────────
 st.subheader("🗓️ Detailed 30-Day Outflow Schedule")
@@ -351,6 +351,6 @@ if upcoming_list:
             "Urgency Status": p.urgency_status,
         })
     df_sched = pd.DataFrame(sched_rows)
-    st.dataframe(df_sched, use_container_width=True, hide_index=True)
+    st.dataframe(df_sched, width="stretch", hide_index=True)
 else:
     st.info("No payments due in the next 30 days.")

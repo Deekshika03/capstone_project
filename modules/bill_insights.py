@@ -91,6 +91,6 @@ def render(df: pd.DataFrame) -> None:
                 "Next Due Date": b.next_due_date.strftime("%Y-%m-%d"),
                 "Occurrences": b.payment_count,
             })
-        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
     else:
         st.info("No recurring bills identified.")

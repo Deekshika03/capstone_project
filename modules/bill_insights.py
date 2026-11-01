@@ -54,29 +54,25 @@ def render(df: pd.DataFrame) -> None:
     if not alerts:
         st.success("✅ No urgent payment alerts detected.")
     else:
-        for a in alerts[:6]:  # Display top priority alerts
-            badge_color = {
-                AlertPriority.CRITICAL: "#ef4444",
-                AlertPriority.HIGH: "#f97316",
-                AlertPriority.MEDIUM: "#eab308",
-                AlertPriority.LOW: "#38bdf8",
-                AlertPriority.INFO: "#94a3b8",
-            }.get(a.priority, "#94a3b8")
+        for a in alerts[:6]:
+            if a.priority == AlertPriority.CRITICAL:
+                fn = st.error
+            elif a.priority == AlertPriority.HIGH:
+                fn = st.warning
+            else:
+                fn = st.info
 
-            st.markdown(
-                f"""
-                <div style="border-left: 4px solid {badge_color}; background: #1e1e2e; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong style="color:#ffffff;">{a.title}</strong>
-                        <span style="background:{badge_color}; color:#ffffff; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700;">
-                            {a.priority.value} (Score {a.urgency_score})
-                        </span>
-                    </div>
-                    <div style="color:#cbd5e1; font-size:13px; margin-top:4px;">{a.message}</div>
-                    {f'<div style="color:#9ca3af; font-size:12px; margin-top:2px;">Due: {a.due_date} &bull; {a.days_until_due}d left</div>' if a.due_date and a.days_until_due is not None else ''}
-                </div>
-                """,
-                unsafe_allow_html=True,
+            emi_label = " 🏦 EMI" if a.is_emi else ""
+            if a.due_date and a.days_until_due is not None:
+                due_info = f" | Due: {a.due_date} ({a.days_until_due}d left)"
+            elif a.due_date:
+                due_info = f" | Due: {a.due_date}"
+            else:
+                due_info = ""
+
+            fn(
+                f"**{a.title}**{emi_label} — Score {a.urgency_score}{due_info}\n\n"
+                f"{a.message}"
             )
 
     st.markdown("<br>", unsafe_allow_html=True)

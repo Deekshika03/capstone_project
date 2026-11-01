@@ -210,45 +210,28 @@ if not alerts:
     st.success("✅ No urgent payment alerts detected. All projected cash flows are balanced!")
 else:
     for a in alerts:
-        css_card = "alert-card-low"
-        badge_cls = "badge-low"
+        # Choose native Streamlit alert based on priority
         if a.priority == AlertPriority.CRITICAL:
-            css_card = "alert-card-critical"
-            badge_cls = "badge-critical"
+            fn = st.error
         elif a.priority == AlertPriority.HIGH:
-            css_card = "alert-card-high"
-            badge_cls = "badge-high"
+            fn = st.warning
         elif a.priority == AlertPriority.MEDIUM:
-            css_card = "alert-card-medium"
-            badge_cls = "badge-medium"
+            fn = st.info
+        else:
+            fn = st.info
 
-        emi_tag = '<span class="badge badge-emi">EMI</span>' if a.is_emi else ''
+        emi_label = " 🏦 EMI" if a.is_emi else ""
         if a.due_date and a.days_until_due is not None:
-            due_info = f" • Due: {a.due_date} ({a.days_until_due}d left)"
+            due_info = f" | Due: {a.due_date} ({a.days_until_due}d left)"
         elif a.due_date:
-            due_info = f" • Due: {a.due_date}"
+            due_info = f" | Due: {a.due_date}"
         else:
             due_info = ""
 
-        st.markdown(f"""
-        <div class="{css_card}">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <span style="font-weight:700; font-size:15px; color:#ffffff;">
-                    {a.title}
-                </span>
-                <div>
-                    {emi_tag}
-                    <span class="badge {badge_cls}">{a.priority.value} (Score {a.urgency_score})</span>
-                </div>
-            </div>
-            <div style="color:#d1d5db; font-size:14px; line-height:1.5;">
-                {a.message}
-            </div>
-            <div style="color:#9ca3af; font-size:12px; margin-top:4px;">
-                {due_info}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        fn(
+            f"**{a.title}**{emi_label} — Score {a.urgency_score}{due_info}\n\n"
+            f"{a.message}"
+        )
 
 st.markdown("<br>", unsafe_allow_html=True)
 

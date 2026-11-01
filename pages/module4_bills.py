@@ -223,7 +223,12 @@ else:
             badge_cls = "badge-medium"
 
         emi_tag = '<span class="badge badge-emi">EMI</span>' if a.is_emi else ''
-        due_info = f" • Due: {a.due_date} ({a.days_until_due}d left)" if a.due_date else ""
+        if a.due_date and a.days_until_due is not None:
+            due_info = f" • Due: {a.due_date} ({a.days_until_due}d left)"
+        elif a.due_date:
+            due_info = f" • Due: {a.due_date}"
+        else:
+            due_info = ""
 
         st.markdown(f"""
         <div class="{css_card}">

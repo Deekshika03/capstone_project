@@ -73,6 +73,7 @@ def render(df: pd.DataFrame) -> None:
                         </span>
                     </div>
                     <div style="color:#cbd5e1; font-size:13px; margin-top:4px;">{a.message}</div>
+                    {f'<div style="color:#9ca3af; font-size:12px; margin-top:2px;">Due: {a.due_date} &bull; {a.days_until_due}d left</div>' if a.due_date and a.days_until_due is not None else ''}
                 </div>
                 """,
                 unsafe_allow_html=True,

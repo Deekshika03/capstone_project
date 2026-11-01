@@ -7,77 +7,52 @@ from src.assistant.voice import text_to_speech_html, speech_to_text_from_bytes, 
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Financial Friend AI",
+    page_title="FinGuard AI – Expense Manager",
     page_icon="💰",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# ── Global CSS ────────────────────────────────────────────────────────────────
+# ── Global CSS — original dark theme ─────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── Base ── */
 [data-testid="stAppViewContainer"] {
-    background: #f0f4ff;
+    background: #0f0f1a;
     font-family: 'Segoe UI', sans-serif;
 }
-[data-testid="stHeader"] { background: transparent; }
-[data-testid="stSidebar"] { background: #1e1b4b; }
+[data-testid="stHeader"]  { background: transparent; }
+[data-testid="stSidebar"] { background: #1e1e2e; }
 
-/* ── Top header bar ── */
-.top-header {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
-    border-radius: 16px;
-    padding: 24px 32px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.top-header-title { color: #fff; font-size: 26px; font-weight: 700; margin: 0; }
-.top-header-sub   { color: #c4b5fd; font-size: 14px; margin-top: 4px; }
-.top-header-badge {
-    background: rgba(255,255,255,0.15);
-    border-radius: 50px;
-    padding: 6px 16px;
-    color: #e0e7ff;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-/* ── Metric cards ── */
+/* ── Metric cards — original ── */
 .metric-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 20px 24px;
-    box-shadow: 0 2px 12px rgba(99,102,241,0.10);
-    border-left: 4px solid #6366f1;
+    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #3a3a5e;
     margin-bottom: 8px;
 }
-.metric-card.income  { border-left-color: #10b981; }
-.metric-card.expense { border-left-color: #ef4444; }
-.metric-card.balance { border-left-color: #6366f1; }
-.metric-card.score   { border-left-color: #f59e0b; }
-.metric-label { color: #6b7280; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-.metric-value { font-size: 26px; font-weight: 700; color: #111827; }
-.metric-value.green  { color: #10b981; }
-.metric-value.red    { color: #ef4444; }
-.metric-value.blue   { color: #6366f1; }
-.metric-value.amber  { color: #f59e0b; }
+.metric-label { color: #a0a0c0; font-size: 14px; margin-bottom: 6px; }
+.metric-value { font-size: 28px; font-weight: 700; }
+.income  { color: #4ade80; }
+.expense { color: #f87171; }
+.balance { color: #60a5fa; }
+.score   { color: #fbbf24; }
 
 /* ── AI Assistant card ── */
 .ai-assistant-card {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4c1d95 100%);
+    background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 60%, #3b1f8c 100%);
     border-radius: 20px;
     padding: 28px 32px;
     margin-bottom: 24px;
-    box-shadow: 0 8px 32px rgba(99,102,241,0.25);
+    border: 1px solid #7c3aed;
+    box-shadow: 0 8px 32px rgba(124,58,237,0.3);
 }
 .ai-header {
     display: flex;
     align-items: center;
     gap: 14px;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
 }
 .ai-avatar {
     width: 52px; height: 52px;
@@ -85,32 +60,30 @@ st.markdown("""
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 26px;
-    box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+    box-shadow: 0 4px 12px rgba(124,58,237,0.5);
     flex-shrink: 0;
 }
-.ai-name  { color: #fff; font-size: 20px; font-weight: 700; }
-.ai-tagline { color: #c4b5fd; font-size: 13px; margin-top: 2px; }
+.ai-name    { color: #e0e7ff; font-size: 20px; font-weight: 700; }
+.ai-tagline { color: #a5b4fc; font-size: 13px; margin-top: 2px; }
 .ai-status {
     display: inline-block;
     width: 8px; height: 8px;
-    background: #10b981;
+    background: #4ade80;
     border-radius: 50%;
     margin-right: 6px;
     animation: pulse 2s infinite;
 }
-@keyframes pulse {
-    0%,100% { opacity:1; } 50% { opacity:0.4; }
-}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 
 /* ── Chat bubbles ── */
 .chat-container {
-    max-height: 340px;
+    max-height: 320px;
     overflow-y: auto;
     padding: 4px 0 12px 0;
     margin-bottom: 12px;
 }
 .chat-bubble-user {
-    background: rgba(255,255,255,0.15);
+    background: rgba(99,102,241,0.25);
     border-radius: 14px 14px 4px 14px;
     padding: 10px 16px;
     margin: 8px 0 8px 40px;
@@ -119,88 +92,57 @@ st.markdown("""
     line-height: 1.5;
 }
 .chat-bubble-bot {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.07);
     border-radius: 14px 14px 14px 4px;
     padding: 10px 16px;
     margin: 8px 40px 8px 0;
-    color: #e0e7ff;
+    color: #c4b5fd;
     font-size: 14px;
     line-height: 1.5;
     border-left: 3px solid #7c3aed;
 }
-.chat-sender-user { color: #a5b4fc; font-size: 11px; font-weight: 600; margin-bottom: 3px; text-align: right; }
+.chat-sender-user { color: #a5b4fc; font-size: 11px; font-weight: 600; margin-bottom: 3px; text-align:right; }
 .chat-sender-bot  { color: #c4b5fd; font-size: 11px; font-weight: 600; margin-bottom: 3px; }
-
-/* ── Suggested question pills ── */
-.sq-pill {
-    display: inline-block;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 50px;
-    padding: 6px 14px;
-    color: #e0e7ff;
-    font-size: 12px;
-    cursor: pointer;
-    margin: 3px;
-    transition: background 0.2s;
-}
-.sq-pill:hover { background: rgba(255,255,255,0.22); }
 
 /* ── Section cards ── */
 .section-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 12px rgba(99,102,241,0.08);
+    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+    border-radius: 14px;
+    padding: 20px 24px;
+    border: 1px solid #3a3a5e;
     margin-bottom: 20px;
 }
 .section-title {
     font-size: 16px;
     font-weight: 700;
-    color: #1e1b4b;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: #c4b5fd;
+    margin-bottom: 12px;
 }
 
 /* ── Upload zone ── */
 .upload-zone {
-    background: #fff;
-    border: 2px dashed #c7d2fe;
+    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+    border: 2px dashed #3a3a5e;
     border-radius: 16px;
     padding: 32px;
     text-align: center;
     margin-bottom: 20px;
 }
-.upload-title { color: #1e1b4b; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-.upload-sub   { color: #6b7280; font-size: 14px; }
+.upload-title { color: #e0e7ff; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.upload-sub   { color: #a0a0c0; font-size: 14px; }
 
 /* ── Streamlit overrides ── */
-div[data-testid="stTabs"] button {
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #4b5563 !important;
-    padding: 10px 20px !important;
-}
-div[data-testid="stTabs"] button[aria-selected="true"] {
-    color: #4f46e5 !important;
-    border-bottom: 3px solid #4f46e5 !important;
-}
-div[data-testid="stTabs"] { background: #fff; border-radius: 12px; padding: 4px 8px 0; box-shadow: 0 2px 8px rgba(99,102,241,0.08); margin-bottom: 16px; }
 .stTextInput > div > div > input {
+    background: #1e1e2e !important;
+    color: #e0e7ff !important;
+    border: 1.5px solid #3a3a5e !important;
     border-radius: 10px !important;
-    border: 1.5px solid #c7d2fe !important;
-    font-size: 14px !important;
-    padding: 10px 14px !important;
 }
 .stButton > button {
     border-radius: 10px !important;
     font-weight: 600 !important;
-    font-size: 14px !important;
-    transition: all 0.2s !important;
+    font-size: 13px !important;
 }
-.stButton > button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.2) !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -229,6 +171,9 @@ def load_and_validate(file) -> pd.DataFrame:
         st.stop()
     df.dropna(subset=["Date", "Amount", "Type"], inplace=True)
     df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce")
+    invalid = df["Amount"].isna().sum()
+    if invalid:
+        st.warning(f"⚠️ {invalid} row(s) had non-numeric amounts and were removed.")
     df.dropna(subset=["Amount"], inplace=True)
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     df.dropna(subset=["Date"], inplace=True)
@@ -247,29 +192,18 @@ def health_score(df: pd.DataFrame) -> int:
     s  += 20 if sr >= 20 else int(min(sr, 20))
     return max(0, min(100, s))
 
-# ── Session state init ────────────────────────────────────────────────────────
+# ── Session state ─────────────────────────────────────────────────────────────
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [{"role": "bot", "text": WELCOME_MESSAGE}]
 if "tts_muted" not in st.session_state:
     st.session_state.tts_muted = False
 
-# ── Top header ────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="top-header">
-  <div>
-    <div class="top-header-title">💰 Financial Friend AI</div>
-    <div class="top-header-sub">Welcome Back! Your AI Financial Friend is here.</div>
-  </div>
-  <div class="top-header-badge">🤖 AI Powered</div>
-</div>
-""", unsafe_allow_html=True)
+# ── Header ────────────────────────────────────────────────────────────────────
+st.title("💰 FinGuard AI — Smart Expense Manager")
+st.caption("Welcome Back! Your AI Financial Friend is here.")
 
 # ── File upload ───────────────────────────────────────────────────────────────
-uploaded = st.file_uploader(
-    "📂 Upload your bank transactions CSV (Date, Description, Amount, Type)",
-    type="csv",
-    help="Required columns: Date, Description, Amount, Type",
-)
+uploaded = st.file_uploader("📂 Upload CSV (Date, Description, Amount, Type)", type="csv")
 
 # ── Load data ─────────────────────────────────────────────────────────────────
 df = None
@@ -288,7 +222,7 @@ if uploaded:
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🏠 Dashboard",
+    "📊 Dashboard",
     "🎯 Budget Insights",
     "💳 Recurring Bills & EMIs",
     "🛡️ Emergency Fund",
@@ -299,10 +233,9 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ═══════════════════════════════════════════════════════════════════════════════
 with tab1:
 
-    # ── AI Assistant Card ─────────────────────────────────────────────────────
+    # ── AI Assistant Card (always visible) ────────────────────────────────────
     st.markdown('<div class="ai-assistant-card">', unsafe_allow_html=True)
 
-    # Header row
     st.markdown("""
     <div class="ai-header">
       <div class="ai-avatar">🤖</div>
@@ -379,7 +312,6 @@ with tab1:
         with st.spinner("🤔 Thinking…"):
             answer = generate_response(question, df)
         st.session_state.chat_history.append({"role": "bot", "text": answer})
-        # TTS
         if tts_available() and not st.session_state.tts_muted:
             plain = answer.replace("**", "").replace("#", "").replace("\n", " ")
             audio_html = text_to_speech_html(plain[:400])
@@ -387,73 +319,64 @@ with tab1:
                 st.markdown(audio_html, unsafe_allow_html=True)
         st.rerun()
 
-    # Clear chat
     if st.button("🗑️ Clear Chat", key="clear_chat"):
         st.session_state.chat_history = [{"role": "bot", "text": WELCOME_MESSAGE}]
         st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)  # close ai-assistant-card
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ── No data state ─────────────────────────────────────────────────────────
     if df is None:
         st.markdown("""
         <div class="upload-zone">
           <div class="upload-title">📊 Upload Your Transactions to Get Started</div>
-          <div class="upload-sub">Upload a CSV file above to unlock your full financial dashboard,<br>
+          <div class="upload-sub">Upload a CSV file above to unlock your full financial dashboard,
           charts, health score, and personalised AI insights.</div>
         </div>
         """, unsafe_allow_html=True)
         with open("sample_transactions.csv", "rb") as f:
-            st.download_button(
-                "⬇️ Download Sample CSV to Try",
-                f, "sample_transactions.csv", "text/csv",
-            )
+            st.download_button("⬇️ Download Sample CSV", f, "sample_transactions.csv", "text/csv")
         st.stop()
 
-    # ── Summary metric cards ──────────────────────────────────────────────────
+    # ── Summary cards — original style ───────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
-    m1, m2, m3, m4 = st.columns(4)
-    metrics = [
-        (m1, "💰 Total Income",   f"₹{total_income:,.0f}",  "income",  "green"),
-        (m2, "💸 Total Expenses", f"₹{total_expense:,.0f}", "expense", "red"),
-        (m3, "💼 Net Balance",    f"₹{balance:,.0f}",       "balance", "blue"),
-        (m4, "🏆 Health Score",   f"{score}/100",           "score",   "amber"),
-    ]
-    for col, label, value, card_cls, val_cls in metrics:
+    c1, c2, c3, c4 = st.columns(4)
+    for col, label, value, css in [
+        (c1, "Total Income",   f"₹{total_income:,.2f}",  "income"),
+        (c2, "Total Expenses", f"₹{total_expense:,.2f}", "expense"),
+        (c3, "Balance",        f"₹{balance:,.2f}",       "balance"),
+        (c4, "Health Score",   f"{score}/100",           "score"),
+    ]:
         col.markdown(f"""
-        <div class="metric-card {card_cls}">
+        <div class="metric-card">
             <div class="metric-label">{label}</div>
-            <div class="metric-value {val_cls}">{value}</div>
+            <div class="metric-value {css}">{value}</div>
         </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Charts ────────────────────────────────────────────────────────────────
+    # ── Charts — original colors ──────────────────────────────────────────────
     col_pie, col_bar = st.columns(2)
 
     with col_pie:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">🍩 Expenses by Category</div>', unsafe_allow_html=True)
+        st.subheader("🍕 Expenses by Category")
         cat_data = expense_df.groupby("Category")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
         cat_data.columns = ["Category", "Amount"]
         fig_pie = px.pie(
             cat_data, values="Amount", names="Category",
-            color_discrete_sequence=["#6366f1","#8b5cf6","#a78bfa","#c4b5fd","#ddd6fe","#ede9fe"],
-            hole=0.45,
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+            hole=0.4,
         )
         fig_pie.update_traces(textposition="inside", textinfo="percent+label")
         fig_pie.update_layout(
-            showlegend=True, margin=dict(t=10, b=10),
+            showlegend=False, margin=dict(t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#374151"),
-            legend=dict(orientation="h", yanchor="bottom", y=-0.3),
+            font=dict(color="#a0a0c0"),
         )
         st.plotly_chart(fig_pie, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_bar:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">📊 Monthly Income vs Expenses</div>', unsafe_allow_html=True)
+        st.subheader("📊 Monthly Income vs Expenses")
         mi = income_df.groupby("Month")["Amount"].sum().reset_index()
         me = expense_df.groupby("Month")["Amount"].apply(lambda x: abs(x).sum()).reset_index()
         mi["Type"] = "Income"
@@ -464,20 +387,18 @@ with tab1:
         monthly.sort_values("Month", inplace=True)
         fig_bar = px.bar(
             monthly, x="Month", y="Amount", color="Type", barmode="group",
-            color_discrete_map={"Income": "#10b981", "Expense": "#ef4444"},
+            color_discrete_map={"Income": "#4ade80", "Expense": "#f87171"},
         )
         fig_bar.update_layout(
             legend_title_text="", margin=dict(t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#374151"),
+            font=dict(color="#a0a0c0"),
         )
         st.plotly_chart(fig_bar, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # ── Transactions table ────────────────────────────────────────────────────
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">🔍 All Transactions</div>', unsafe_allow_html=True)
-    search = st.text_input("Search", placeholder="Search by description or category…", label_visibility="collapsed")
+    st.subheader("🔍 All Transactions")
+    search = st.text_input("Search by description or category", placeholder="e.g. Amazon, Food…")
     disp = df.copy()
     if search:
         mask = (
@@ -491,7 +412,6 @@ with tab1:
         use_container_width=True, hide_index=True,
     )
     st.caption(f"Showing {len(disp)} of {len(df)} transactions")
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # TAB 2 — BUDGET INSIGHTS

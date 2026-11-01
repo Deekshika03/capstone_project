@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 from modules import budget_insights, bill_insights, emergency_fund_insights
 from src.assistant.financial_assistant import generate_response, SUGGESTED_QUESTIONS, WELCOME_MESSAGE
+from src.assistant.financial_context import build_financial_context
 from src.assistant.voice import text_to_speech_html, speech_to_text_from_bytes, tts_available, stt_available
 
 # ── Page config ───────────────────────────────────────────────────────────────
@@ -23,7 +24,6 @@ st.markdown("""
 [data-testid="stHeader"]  { background: transparent; }
 [data-testid="stSidebar"] { background: #1e1e2e; }
 
-/* ── Metric cards — original ── */
 .metric-card {
     background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
     border-radius: 12px;
@@ -39,7 +39,6 @@ st.markdown("""
 .balance { color: #60a5fa; }
 .score   { color: #fbbf24; }
 
-/* ── AI Assistant card ── */
 .ai-assistant-card {
     background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 60%, #3b1f8c 100%);
     border-radius: 20px;
@@ -48,12 +47,7 @@ st.markdown("""
     border: 1px solid #7c3aed;
     box-shadow: 0 8px 32px rgba(124,58,237,0.3);
 }
-.ai-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 12px;
-}
+.ai-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
 .ai-avatar {
     width: 52px; height: 52px;
     background: linear-gradient(135deg, #7c3aed, #4f46e5);
@@ -66,83 +60,82 @@ st.markdown("""
 .ai-name    { color: #e0e7ff; font-size: 20px; font-weight: 700; }
 .ai-tagline { color: #a5b4fc; font-size: 13px; margin-top: 2px; }
 .ai-status {
-    display: inline-block;
-    width: 8px; height: 8px;
-    background: #4ade80;
-    border-radius: 50%;
-    margin-right: 6px;
+    display: inline-block; width: 8px; height: 8px;
+    background: #4ade80; border-radius: 50%; margin-right: 6px;
     animation: pulse 2s infinite;
 }
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 
-/* ── Chat bubbles ── */
-.chat-container {
-    max-height: 320px;
-    overflow-y: auto;
-    padding: 4px 0 12px 0;
-    margin-bottom: 12px;
-}
+.chat-container { max-height: 320px; overflow-y: auto; padding: 4px 0 12px 0; margin-bottom: 12px; }
 .chat-bubble-user {
     background: rgba(99,102,241,0.25);
     border-radius: 14px 14px 4px 14px;
-    padding: 10px 16px;
-    margin: 8px 0 8px 40px;
-    color: #e0e7ff;
-    font-size: 14px;
-    line-height: 1.5;
+    padding: 10px 16px; margin: 8px 0 8px 40px;
+    color: #e0e7ff; font-size: 14px; line-height: 1.5;
 }
 .chat-bubble-bot {
     background: rgba(255,255,255,0.07);
     border-radius: 14px 14px 14px 4px;
-    padding: 10px 16px;
-    margin: 8px 40px 8px 0;
-    color: #c4b5fd;
-    font-size: 14px;
-    line-height: 1.5;
+    padding: 10px 16px; margin: 8px 40px 8px 0;
+    color: #c4b5fd; font-size: 14px; line-height: 1.5;
     border-left: 3px solid #7c3aed;
 }
 .chat-sender-user { color: #a5b4fc; font-size: 11px; font-weight: 600; margin-bottom: 3px; text-align:right; }
 .chat-sender-bot  { color: #c4b5fd; font-size: 11px; font-weight: 600; margin-bottom: 3px; }
 
-/* ── Section cards ── */
-.section-card {
+/* AI Insights card */
+.insights-card {
     background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
-    border-radius: 14px;
-    padding: 20px 24px;
-    border: 1px solid #3a3a5e;
-    margin-bottom: 20px;
+    border-radius: 14px; padding: 20px 24px;
+    border: 1px solid #3a3a5e; margin-bottom: 20px;
 }
-.section-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #c4b5fd;
-    margin-bottom: 12px;
+.insights-title { color: #c4b5fd; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.insight-item {
+    background: rgba(124,58,237,0.12);
+    border-left: 3px solid #7c3aed;
+    border-radius: 0 8px 8px 0;
+    padding: 8px 14px; margin-bottom: 8px;
+    color: #e0e7ff; font-size: 13px; line-height: 1.5;
+}
+.action-item {
+    background: rgba(74,222,128,0.08);
+    border-left: 3px solid #4ade80;
+    border-radius: 0 8px 8px 0;
+    padding: 8px 14px; margin-bottom: 8px;
+    color: #d1fae5; font-size: 13px;
 }
 
-/* ── Upload zone ── */
+/* Quick Actions */
+.quick-action-card {
+    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+    border-radius: 14px; padding: 20px;
+    border: 1px solid #3a3a5e; text-align: center;
+    margin-bottom: 8px; cursor: pointer;
+    transition: border-color 0.2s;
+}
+.quick-action-card:hover { border-color: #7c3aed; }
+.qa-icon  { font-size: 28px; margin-bottom: 8px; }
+.qa-label { color: #e0e7ff; font-size: 13px; font-weight: 600; }
+.qa-sub   { color: #a0a0c0; font-size: 11px; margin-top: 4px; }
+
+.section-card {
+    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+    border-radius: 14px; padding: 20px 24px;
+    border: 1px solid #3a3a5e; margin-bottom: 20px;
+}
 .upload-zone {
     background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
-    border: 2px dashed #3a3a5e;
-    border-radius: 16px;
-    padding: 32px;
-    text-align: center;
-    margin-bottom: 20px;
+    border: 2px dashed #3a3a5e; border-radius: 16px;
+    padding: 32px; text-align: center; margin-bottom: 20px;
 }
 .upload-title { color: #e0e7ff; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
 .upload-sub   { color: #a0a0c0; font-size: 14px; }
 
-/* ── Streamlit overrides ── */
 .stTextInput > div > div > input {
-    background: #1e1e2e !important;
-    color: #e0e7ff !important;
-    border: 1.5px solid #3a3a5e !important;
-    border-radius: 10px !important;
+    background: #1e1e2e !important; color: #e0e7ff !important;
+    border: 1.5px solid #3a3a5e !important; border-radius: 10px !important;
 }
-.stButton > button {
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-    font-size: 13px !important;
-}
+.stButton > button { border-radius: 10px !important; font-weight: 600 !important; font-size: 13px !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -182,16 +175,6 @@ def load_and_validate(file) -> pd.DataFrame:
     df["Month"]    = df["Date"].dt.strftime("%b %Y")
     return df
 
-def health_score(df: pd.DataFrame) -> int:
-    inc = df[df["Type"].str.lower() == "income"]["Amount"].sum()
-    exp = abs(df[df["Type"].str.lower() == "expense"]["Amount"].sum())
-    bal = inc - exp
-    sr  = (bal / inc * 100) if inc > 0 else 0
-    s   = min(40, int(sr * 0.8))
-    s  += min(40, int((bal / inc * 40) if inc > 0 else 0))
-    s  += 20 if sr >= 20 else int(min(sr, 20))
-    return max(0, min(100, s))
-
 # ── Session state ─────────────────────────────────────────────────────────────
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [{"role": "bot", "text": WELCOME_MESSAGE}]
@@ -205,11 +188,11 @@ st.caption("Welcome Back! Your AI Financial Friend is here.")
 # ── File upload ───────────────────────────────────────────────────────────────
 uploaded = st.file_uploader("📂 Upload CSV (Date, Description, Amount, Type)", type="csv")
 
-# ── Load data ─────────────────────────────────────────────────────────────────
+# ── Load data & build context ─────────────────────────────────────────────────
 df = None
 income_df = expense_df = pd.DataFrame()
 total_income = total_expense = balance = 0.0
-score = 0
+ctx = None
 
 if uploaded:
     df = load_and_validate(uploaded)
@@ -218,7 +201,7 @@ if uploaded:
     total_income  = income_df["Amount"].sum()
     total_expense = abs(expense_df["Amount"].sum())
     balance       = total_income - total_expense
-    score         = health_score(df)
+    ctx = build_financial_context(df)
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -235,7 +218,6 @@ with tab1:
 
     # ── AI Assistant Card (always visible) ────────────────────────────────────
     st.markdown('<div class="ai-assistant-card">', unsafe_allow_html=True)
-
     st.markdown("""
     <div class="ai-header">
       <div class="ai-avatar">🤖</div>
@@ -310,7 +292,7 @@ with tab1:
     if question:
         st.session_state.chat_history.append({"role": "user", "text": question})
         with st.spinner("🤔 Thinking…"):
-            answer = generate_response(question, df)
+            answer = generate_response(question, df, ctx)
         st.session_state.chat_history.append({"role": "bot", "text": answer})
         if tts_available() and not st.session_state.tts_muted:
             plain = answer.replace("**", "").replace("#", "").replace("\n", " ")
@@ -338,14 +320,14 @@ with tab1:
             st.download_button("⬇️ Download Sample CSV", f, "sample_transactions.csv", "text/csv")
         st.stop()
 
-    # ── Summary cards — original style ───────────────────────────────────────
+    # ── Summary metric cards ──────────────────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     for col, label, value, css in [
-        (c1, "Total Income",   f"₹{total_income:,.2f}",  "income"),
-        (c2, "Total Expenses", f"₹{total_expense:,.2f}", "expense"),
-        (c3, "Balance",        f"₹{balance:,.2f}",       "balance"),
-        (c4, "Health Score",   f"{score}/100",           "score"),
+        (c1, "Total Income",   f"₹{total_income:,.2f}",       "income"),
+        (c2, "Total Expenses", f"₹{total_expense:,.2f}",      "expense"),
+        (c3, "Balance",        f"₹{balance:,.2f}",            "balance"),
+        (c4, "Health Score",   f"{ctx.health_score}/100",     "score"),
     ]:
         col.markdown(f"""
         <div class="metric-card">
@@ -355,7 +337,66 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Charts — original colors ──────────────────────────────────────────────
+    # ── AI Insights + Quick Actions (side by side) ────────────────────────────
+    col_insights, col_actions = st.columns([3, 2])
+
+    with col_insights:
+        st.markdown('<div class="insights-card">', unsafe_allow_html=True)
+        st.markdown('<div class="insights-title">🧠 AI Insights</div>', unsafe_allow_html=True)
+        for insight in ctx.insights:
+            clean = insight.replace("**", "").replace("*", "")
+            st.markdown(f'<div class="insight-item">{clean}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="insights-card">', unsafe_allow_html=True)
+        st.markdown('<div class="insights-title">✅ Recommended Actions</div>', unsafe_allow_html=True)
+        for i, step in enumerate(ctx.action_steps, 1):
+            st.markdown(f'<div class="action-item">{i}. {step}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col_actions:
+        st.markdown("**⚡ Quick Actions**")
+        qa1, qa2 = st.columns(2)
+        with qa1:
+            st.markdown("""<div class="quick-action-card">
+                <div class="qa-icon">📊</div>
+                <div class="qa-label">Expenses</div>
+                <div class="qa-sub">View breakdown</div>
+            </div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="quick-action-card">
+                <div class="qa-icon">💳</div>
+                <div class="qa-label">EMI Tracker</div>
+                <div class="qa-sub">Upcoming bills</div>
+            </div>""", unsafe_allow_html=True)
+        with qa2:
+            st.markdown("""<div class="quick-action-card">
+                <div class="qa-icon">🎯</div>
+                <div class="qa-label">Budget</div>
+                <div class="qa-sub">Set limits</div>
+            </div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="quick-action-card">
+                <div class="qa-icon">🛡️</div>
+                <div class="qa-label">Emergency Fund</div>
+                <div class="qa-sub">Safety net</div>
+            </div>""", unsafe_allow_html=True)
+
+        # Mini financial overview
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("**📋 Financial Overview**")
+        st.markdown(f"""
+        <div class="insights-card" style="padding:14px 18px;">
+            <div style="color:#a0a0c0;font-size:12px;margin-bottom:6px;">Monthly Income</div>
+            <div style="color:#4ade80;font-size:18px;font-weight:700;">₹{ctx.monthly_income:,.0f}</div>
+            <div style="color:#a0a0c0;font-size:12px;margin:8px 0 4px;">Monthly Expenses</div>
+            <div style="color:#f87171;font-size:18px;font-weight:700;">₹{ctx.monthly_expense:,.0f}</div>
+            <div style="color:#a0a0c0;font-size:12px;margin:8px 0 4px;">Savings Rate</div>
+            <div style="color:#fbbf24;font-size:18px;font-weight:700;">{ctx.savings_rate:.1f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Charts ────────────────────────────────────────────────────────────────
     col_pie, col_bar = st.columns(2)
 
     with col_pie:
@@ -373,7 +414,7 @@ with tab1:
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#a0a0c0"),
         )
-        st.plotly_chart(fig_pie, width="stretch")
+        st.plotly_chart(fig_pie, use_container_width=True)
 
     with col_bar:
         st.subheader("📊 Monthly Income vs Expenses")
@@ -394,7 +435,7 @@ with tab1:
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#a0a0c0"),
         )
-        st.plotly_chart(fig_bar, width="stretch")
+        st.plotly_chart(fig_bar, use_container_width=True)
 
     # ── Transactions table ────────────────────────────────────────────────────
     st.subheader("🔍 All Transactions")
@@ -409,7 +450,7 @@ with tab1:
     disp["Date"] = disp["Date"].dt.strftime("%Y-%m-%d")
     st.dataframe(
         disp[["Date", "Description", "Amount", "Type", "Category"]],
-        width="stretch", hide_index=True,
+        use_container_width=True, hide_index=True,
     )
     st.caption(f"Showing {len(disp)} of {len(df)} transactions")
 
